@@ -15,7 +15,7 @@ function App() {
   return (
     <Provider store={store}>
       <ChakraProvider>
-        <Router>
+        <Router basename="/">
           <Routes>
             {/* Public Routes */}
             <Route path="/login" element={<Login />} />
