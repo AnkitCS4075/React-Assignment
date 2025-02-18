@@ -4,6 +4,7 @@ import 'react-quill/dist/quill.snow.css'
 import { useSelector } from 'react-redux'
 import { RootState } from '../store'
 import { useEffect, useState } from 'react'
+import { authService } from '../services/authService'
 
 const RichTextEditor = () => {
   const userData = useSelector((state: RootState) => state.userData.data)
@@ -25,15 +26,17 @@ const RichTextEditor = () => {
   ]
 
   useEffect(() => {
-    const content = userData
-      ? `<h2>User Data</h2>
+    const currentUser = authService.getCurrentUser()
+    if (currentUser && userData && userData.email === currentUser.email) {
+      const content = `<h2>User Data</h2>
          <p><strong>Name:</strong> ${userData.name || 'Not provided'}</p>
          <p><strong>Address:</strong> ${userData.address || 'Not provided'}</p>
          <p><strong>Email:</strong> ${userData.email || 'Not provided'}</p>
          <p><strong>Phone:</strong> ${userData.phone || 'Not provided'}</p>`
-      : '<p>No user data available. Please fill out and save the form.</p>'
-    
-    setEditorContent(content)
+      setEditorContent(content)
+    } else {
+      setEditorContent('<p>Please fill out and save the User Data form to see your information here.</p>')
+    }
   }, [userData])
 
   const handleEditorChange = (content: string) => {

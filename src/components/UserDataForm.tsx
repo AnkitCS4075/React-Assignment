@@ -12,8 +12,9 @@ import {
 } from '@chakra-ui/react'
 import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '../store'
-import { saveUserData, updateUserData, loadUserData } from '../store/slices/userDataSlice'
+import { saveUserData, updateUserData, loadUserData, resetUserData } from '../store/slices/userDataSlice'
 import type { UserData } from '../store/slices/userDataSlice'
+import { authService } from '../services/authService'
 
 const UserDataForm = () => {
   const dispatch = useDispatch()
@@ -25,29 +26,43 @@ const UserDataForm = () => {
   const [errors, setErrors] = useState<Record<string, string>>({})
 
   useEffect(() => {
-    dispatch(loadUserData())
+    const currentUser = authService.getCurrentUser()
+    if (currentUser) {
+      // Only load saved data if it belongs to the current user
+      const savedData = localStorage.getItem('userData')
+      if (savedData) {
+        try {
+          const parsedData = JSON.parse(savedData)
+          if (parsedData.email === currentUser.email) {
+            dispatch(loadUserData())
+          } else {
+            // Clear data if it belongs to a different user
+            dispatch(resetUserData())
+          }
+        } catch (error) {
+          console.error('Error parsing saved data:', error)
+          dispatch(resetUserData())
+        }
+      } else {
+        // Initialize with empty form for new users
+        const initialData: UserData = {
+          id: crypto.randomUUID(),
+          name: currentUser.name || '',
+          address: '',
+          email: currentUser.email || '',
+          phone: ''
+        }
+        dispatch(updateUserData(initialData))
+      }
+    }
     setIsInitialized(true)
   }, [dispatch])
-
-  useEffect(() => {
-    if (isInitialized && !userData) {
-      const initialData: UserData = {
-        id: crypto.randomUUID(),
-        name: '',
-        address: '',
-        email: '',
-        phone: ''
-      }
-      dispatch(updateUserData(initialData))
-    }
-  }, [isInitialized, userData, dispatch])
 
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       if (hasUnsavedChanges) {
         e.preventDefault()
         e.returnValue = ''
-        localStorage.removeItem('userData')
       }
     }
 

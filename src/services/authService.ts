@@ -99,6 +99,8 @@ class AuthService {
       setTimeout(() => {
         this.currentUser = null;
         localStorage.removeItem('user');
+        // Clear all user-related data
+        localStorage.removeItem('userData');
         resolve();
       }, 500);
     });

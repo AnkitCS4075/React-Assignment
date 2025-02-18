@@ -48,11 +48,16 @@ const userDataSlice = createSlice({
         }
       }
     },
+    resetUserData: (state) => {
+      state.data = null
+      state.hasUnsavedChanges = false
+      localStorage.removeItem('userData')
+    },
     resetUnsavedChanges: (state) => {
       state.hasUnsavedChanges = false
     }
   },
 })
 
-export const { saveUserData, updateUserData, loadUserData, resetUnsavedChanges } = userDataSlice.actions
+export const { saveUserData, updateUserData, loadUserData, resetUserData, resetUnsavedChanges } = userDataSlice.actions
 export default userDataSlice.reducer 
